@@ -31,7 +31,7 @@ class RiskExplorerSpec extends FlatSpec with BeforeAndAfter with GivenWhenThen w
     val sortinoRatio = SortinoCalculator.calculate(spark, df)
 
     Then("Sortino is calculated")
-    sortinoRatio should equal(4.417)
+    BigDecimal(sortinoRatio).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble should equal(4.417)
   }
 
 }
