@@ -1,10 +1,13 @@
-# Spark Risk Explorer
-
-Risk measure calculator using Apache Spark
-
 [![Build Status](https://api.travis-ci.org/tibkiss/spark-risk-explorer.svg?branch=master)](https://travis-ci.org/tibkiss/spark-risk-explorer)
 [![Coverage Status](https://coveralls.io/repos/github/tibkiss/spark-risk-explorer/badge.svg?branch=master)](https://coveralls.io/github/tibkiss/spark-risk-explorer?branch=master)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+# Spark Risk Explorer
+
+Calculates financial risk measures using Apache Spark:
+ * Sharpe ratio
+ * Sortino ratio
+ * Max drawdown
 
 ## Usage
 To be extended... Until then:
