@@ -11,6 +11,22 @@ class RiskExplorerSpec extends FlatSpec with BeforeAndAfter with GivenWhenThen w
     .master("local")
     .getOrCreate()
 
+  "Risk Explorer" should "handle CSV file" in {
+    val df = spark.createDataFrame(Seq(Quote(Date.valueOf("2016-01-25"), 100.0),
+                                       Quote(Date.valueOf("2017-01-26"), 100.0*1.1),
+                                       Quote(Date.valueOf("2017-01-27"), 100.0*1.1*1.05),
+                                       Quote(Date.valueOf("2017-01-28"), 100.0*1.1*1.05*1.13),
+                                       Quote(Date.valueOf("2017-01-29"), 100.0*1.1*1.05*1.13*0.93),
+                                       Quote(Date.valueOf("2017-01-30"), 100.0*1.1*1.05*1.13*0.93*1.22)))
+
+    When("Calculate Sharpe")
+    val sharpeRatio = SharpeCalculator.calculate(spark, df)
+
+    Then("Sharpe is calculated")
+    BigDecimal(sharpeRatio).setScale(4, BigDecimal.RoundingMode.HALF_UP).toDouble should equal(0.8044)
+
+  }
+
   "Risk Explorer" should "calculate Sortino ratio" in {
     Given("a set of quotes")
     // Based on Red Rock's Sortino Calculation Example:
