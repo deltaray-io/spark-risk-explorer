@@ -11,10 +11,19 @@ object DrawdownCalculator {
 
     val dfWithRollingDrawdowns = dfWithRollingMaxPrice.withColumn("rolling_dd",
       max(dfWithRollingMaxPrice("rolling_max_price") - dfWithRollingMaxPrice("price")).over(windowUptoCurrentRow))
-    dfWithRollingDrawdowns.show()
 
-    val maxDrawdown = dfWithRollingDrawdowns.agg(max("rolling_dd")).collect(){0}.getDouble(0)
+    dfWithRollingDrawdowns.createOrReplaceTempView("DrawdownCalculation")
 
-    maxDrawdown
+    val dfWithOrderedDrawndowns = sparkSession.sql("SELECT date, price, rolling_dd, rolling_max_price, " +
+                                                   "(rolling_dd / rolling_max_price) as drawdown_pct " +
+                                                   "FROM DrawdownCalculation ORDER BY drawdown_pct ASC")
+
+    dfWithOrderedDrawndowns.show()
+
+    val rollingDrawdown = dfWithOrderedDrawndowns.first().getDouble(2)
+    val rollingMaxPrice = dfWithOrderedDrawndowns.first().getDouble(3)
+    val maxDrawdownPct = dfWithOrderedDrawndowns.first().getDouble(4)
+
+    maxDrawdownPct
   }
 }

@@ -50,23 +50,22 @@ class RiskExplorerSpec extends FlatSpec with BeforeAndAfter with GivenWhenThen w
     BigDecimal(sortinoRatio).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble should equal(4.417)
   }
 
-  "Risk Explorer" should "calculate max drawdown" in {
+  "Risk Explorer" should "calculate max drawdown percent" in {
     val df = spark.createDataFrame(Seq(Quote(Date.valueOf("2016-01-25"), 100.0),
       Quote(Date.valueOf("2017-01-26"), 500),
       Quote(Date.valueOf("2017-01-27"), 750),
-      Quote(Date.valueOf("2017-01-28"), 400),
+      Quote(Date.valueOf("2017-01-28"), 800),
       Quote(Date.valueOf("2017-01-29"), 600),
-      Quote(Date.valueOf("2017-01-30"), 350),
-      Quote(Date.valueOf("2017-01-31"), 800),
-      Quote(Date.valueOf("2017-02-01"), 600),
-      Quote(Date.valueOf("2017-02-02"), 100)))
+      Quote(Date.valueOf("2017-01-30"), 100),
+      Quote(Date.valueOf("2017-01-31"), 900),
+      Quote(Date.valueOf("2017-02-01"), 850),
+      Quote(Date.valueOf("2017-02-02"), 300)))
 
-    When("Calculate drawdown")
-    val maxDrawdown = DrawdownCalculator.calculate(spark, df)
+    When("Calculate maximum drawdown percent")
+    val maxDrawdownPct = DrawdownCalculator.calculate(spark, df)
 
-    Then("Drawdown is calculated")
-    maxDrawdown should equal(700)
-
+    Then("Maximum drawdown percent is calculated")
+    maxDrawdownPct should equal(700 / 800)
   }
 
 
