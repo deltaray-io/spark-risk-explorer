@@ -1,17 +1,11 @@
-import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.spark.sql.functions.lag
 
 object SortinoCalculator {
-
   def calculate(sparkSession: SparkSession, df: DataFrame, targetReturn: Double = 0): Double = {
-    val partition = Window.orderBy("date")
-    val dsWithLagPrice = df.withColumn("prev_price", lag(df("price"), 1).over(partition))
-    val dsWithReturn = dsWithLagPrice.withColumn("return", (dsWithLagPrice("price") - dsWithLagPrice("prev_price")) /
-                                                            dsWithLagPrice("prev_price"))
-    val dsWithExcessReturn = dsWithReturn.withColumn("excess_return", dsWithReturn("return") - targetReturn)
+    val dfWithReturn = RiskUtils.dfWithReturnColumn(df)
+    val dfWithExcessReturn = dfWithReturn.withColumn("excess_return", dfWithReturn("return") - targetReturn)
 
-    dsWithExcessReturn.createOrReplaceTempView("SortinoCalculation")
+    dfWithExcessReturn.createOrReplaceTempView("SortinoCalculation")
 
     val avgReturnDf = sparkSession.sql("SELECT AVG(return) FROM SortinoCalculation")
     val avgReturn = avgReturnDf.first.getDouble(0)
@@ -24,9 +18,8 @@ object SortinoCalculator {
     val targetDownsideDeviation = targetDownsideDeviationDf.first.getDouble(0)
 
 
-    val sortino = (avgReturn - targetReturn) / targetDownsideDeviation
+    val sortinoRatio = (avgReturn - targetReturn) / targetDownsideDeviation
 
-    sortino
+    sortinoRatio
   }
-
 }
