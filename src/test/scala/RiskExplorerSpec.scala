@@ -11,7 +11,7 @@ class RiskExplorerSpec extends FlatSpec with BeforeAndAfter with GivenWhenThen w
     .master("local")
     .getOrCreate()
 
-  "Risk Explorer" should "handle CSV file" in {
+  "Risk Explorer" should "calculate Sharpe ratio" in {
     val df = spark.createDataFrame(Seq(Quote(Date.valueOf("2016-01-25"), 100.0),
                                        Quote(Date.valueOf("2017-01-26"), 100.0*1.1),
                                        Quote(Date.valueOf("2017-01-27"), 100.0*1.1*1.05),
@@ -49,6 +49,26 @@ class RiskExplorerSpec extends FlatSpec with BeforeAndAfter with GivenWhenThen w
     Then("Sortino is calculated")
     BigDecimal(sortinoRatio).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble should equal(4.417)
   }
+
+  "Risk Explorer" should "calculate max drawdown" in {
+    val df = spark.createDataFrame(Seq(Quote(Date.valueOf("2016-01-25"), 100.0),
+      Quote(Date.valueOf("2017-01-26"), 500),
+      Quote(Date.valueOf("2017-01-27"), 750),
+      Quote(Date.valueOf("2017-01-28"), 400),
+      Quote(Date.valueOf("2017-01-29"), 600),
+      Quote(Date.valueOf("2017-01-30"), 350),
+      Quote(Date.valueOf("2017-01-31"), 800),
+      Quote(Date.valueOf("2017-02-01"), 600),
+      Quote(Date.valueOf("2017-02-02"), 100)))
+
+    When("Calculate drawdown")
+    val maxDrawdown = DrawdownCalculator.calculate(spark, df)
+
+    Then("Drawdown is calculated")
+    maxDrawdown should equal(700)
+
+  }
+
 
 }
 
