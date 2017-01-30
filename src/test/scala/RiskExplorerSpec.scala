@@ -68,6 +68,29 @@ class RiskExplorerSpec extends FlatSpec with BeforeAndAfter with GivenWhenThen w
     maxDrawdownPct should equal(700 / 800)
   }
 
+  "Risk Explorer" should "calculate basic risk metrics" in {
+    val df = spark.createDataFrame(Seq(Quote(Date.valueOf("2016-01-01"), 100.0),
+      Quote(Date.valueOf("2016-02-01"), 500),
+      Quote(Date.valueOf("2016-03-01"), 750),
+      Quote(Date.valueOf("2016-04-28"), 800),
+      Quote(Date.valueOf("2016-05-29"), 600),
+      Quote(Date.valueOf("2016-06-30"), 100),
+      Quote(Date.valueOf("2016-07-31"), 900),
+      Quote(Date.valueOf("2016-08-01"), 850),
+      Quote(Date.valueOf("2016-09-02"), 300)))
+
+    When("Calculate basic risk metrics")
+    val (cagr, returnPct, positivePeriodPct) = BasicMetricsCalculator.calculate(spark, df)
+
+    Then("Basic CAGR should be calculated")
+    BigDecimal(cagr).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble should equal(209.57)
+
+    Then("Basic return % should be calculated")
+    returnPct should equal(200)
+
+    Then("Basic positive period % should be calculated")
+    positivePeriodPct should equal(50)
+  }
 
 }
 
